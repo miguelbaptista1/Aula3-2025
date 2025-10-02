@@ -4,6 +4,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include "sjf.h"
+#include "rr.h"
+#include "mlfq.h"
+
 
 #include "debug.h"
 
@@ -231,15 +235,7 @@ void check_blocked_queue(queue_t * blocked_queue, queue_t * command_queue, uint3
     }
 }
 
-static const char *SCHEDULER_NAMES[] = {
-    "FIFO",
-/*
-    "SJF",
-    "RR",
-    "MLFQ",
-*/
-    NULL
-};
+static const char *SCHEDULER_NAMES[] = {"FIFO","SJF","RR","MLFQ",NULL};
 
 typedef enum  {
     NULL_SCHEDULER = -1,
@@ -264,9 +260,10 @@ scheduler_en get_scheduler(const char *name) {
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
-        printf("Usage: %s <scheduler>\nScheduler options: FIFO", argv[0]);
+        printf("Usage: %s <scheduler>\nScheduler options: FIFO SJF RR MLFQ\n", argv[0]);
         exit(EXIT_FAILURE);
     }
+
 
     // Parse arguments
     scheduler_en scheduler_type = get_scheduler(argv[1]);
@@ -309,12 +306,21 @@ int main(int argc, char *argv[]) {
         switch (scheduler_type) {
             case SCHED_FIFO:
                 fifo_scheduler(current_time_ms, &ready_queue, &CPU);
-                break;
-
+            break;
+            case SCHED_SJF:
+                sjf_scheduler(current_time_ms, &ready_queue, &CPU);
+            break;
+            case SCHED_RR:
+                rr_scheduler(current_time_ms, &ready_queue, &CPU);
+            break;
+            case SCHED_MLFQ:
+                mlfq_scheduler(current_time_ms, &ready_queue, &CPU);
+            break;
             default:
                 printf("Unknown scheduler type\n");
-                break;
+            break;
         }
+
 
         // Simulate a tick
         usleep(TICKS_MS * 1000/2);

@@ -68,6 +68,9 @@ int enqueue_pcb(queue_t* q, pcb_t* task);
  */
 pcb_t* dequeue_pcb(queue_t* q);
 
+pcb_t *dequeue_shortest_job(queue_t *q);
+
+
 /**
  * @brief Remove a specific element from the queue
  *
